@@ -90,6 +90,24 @@ button[type="submit"]:hover,
     min-width: 110px;
 }
 
+#delete-btn,
+#tags .del {
+    min-height: 32px;
+    padding: 5px 10px;
+    color: #d58b8b;
+    font-size: 13px;
+}
+
+#delete-btn {
+    display: block;
+    margin-left: auto;
+}
+
+#delete-btn:hover,
+#tags .del:hover {
+    color: #efaaaa;
+}
+
 #display-btn {
     margin-left: 8px;
     background: transparent;
@@ -131,6 +149,36 @@ button[type="submit"]:hover,
 
 #tags:empty {
     display: none;
+}
+
+.date-heading {
+    display: block;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.total-number {
+    color: var(--accent);
+}
+
+.time-entry {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.time-entry > span {
+    min-width: 0;
+}
+
+#tags .del {
+    flex-shrink: 0;
+    min-height: 24px;
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-size: 11px;
 }
 
 ::selection {

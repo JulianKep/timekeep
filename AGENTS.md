@@ -1,0 +1,2 @@
+- always ask for permission when creating, removing or editing any file, no matter where or when.
+- always answer directly and concisely

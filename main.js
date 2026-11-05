@@ -13,7 +13,6 @@ const db = window.supabase.createClient(
 );
 
 //function that reloads all functions that create ui elements that need to be updated
-
 function reload_ui(){
     display_times()
 }
@@ -38,15 +37,17 @@ document.getElementById("login-form").addEventListener("submit", async (event) =
 
 
     container.innerHTML = `
-    <h1>TIME</h1>
+    <h1>TIMER</h1>
         <button id="time-btn">start</button>
-        <button id="display-btn">generate report</button>
-        <button id="delete-btn">delete data</button>
         <p id="timer">
             00:00:00
          </p>
     <p id="tags"></p>
+    <br/>
+    <button id="delete-btn">delete data</button>
     `
+
+    reload_ui();
 
     document.getElementById("time-btn").addEventListener("click", async () => {
 
@@ -75,21 +76,21 @@ document.getElementById("login-form").addEventListener("submit", async (event) =
 
     })
 
-    document.getElementById("display-btn").addEventListener("click", () => {
-        display_times();
-
-    })
-
     document.getElementById("delete-btn").addEventListener("click", async () => {
-        await delete_data();
+        await delete_all_data();
         reload_ui();
-    })
+    });
+
+    document.getElementById("tags").addEventListener("click", (e) => {
+        if (e.target.tagName === "BUTTON") {
+            delete_entry(e.target.parentElement.id);
+        }
+    });
 
 })
 
 
-
-async function delete_data(){
+async function delete_all_data(){
 
     const response = await db
         .from("time")
@@ -98,6 +99,20 @@ async function delete_data(){
 
     console.log(response.status, response.statusText);
 }
+
+async function delete_entry(id){
+
+    const response = await db
+        .from("time")
+        .delete()
+        .eq("id", id)
+
+    console.log(response.status, response.statusText);
+
+    reload_ui();
+}
+
+
 
 async function speichern() {
 
@@ -131,22 +146,38 @@ async function display_times(){
 
     let total_duration = 0;
 
-    for (const element of zeilen){
+    let dateSet = new Set([]);
+    let contidionalHeading = ``
 
+    for (const element of zeilen){
         const start = new Date(element.start)
         const end = new Date(element.end)
+        const date = start.toLocaleDateString("de-DE", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric"
+        });
+
+        if(dateSet.has(date)){
+            contidionalHeading = ``
+        }else{
+            dateSet.add(date)
+            contidionalHeading = `<span class="date-heading">${date}</span>`
+        }
+
         let dur = end - start;
         total_duration += dur
 
         dur  = Math.floor(dur / 1000);
 
-        tags.innerHTML += (dur < 60 ? "[<1 min]   " : `[${String(Math.floor(dur / 3600)).padStart(1, "0")}:${String(Math.floor(dur / 60)).padStart(1, "0")}:${String(dur % 60).padStart(1, "0")}]   `)
-        + start.toLocaleTimeString("de-DE") + " To " + end.toLocaleTimeString("de-DE") +  "<br/>"
+        tags.innerHTML += contidionalHeading
+        tags.innerHTML += `<span id="${element.id}" class="time-entry"><span>[${String(Math.floor(dur / 3600)).padStart(2, "0")}:${String(Math.floor(dur / 60)).padStart(2, "0")}:${String(dur % 60).padStart(2, "0")}]   `
+        + start.toLocaleTimeString("de-DE") + " To " + end.toLocaleTimeString("de-DE") + '</span><button class="del" type="button">delete</button></span>'
     }
 
     //convert from milliseconds to seconds
     total_duration = Math.floor(total_duration / 1000);
 
-    tags.innerHTML += `Total: ${String(Math.floor(total_duration / 3600)).padStart(1, "0")} Hours ${String(Math.floor(total_duration / 60)).padStart(1, "0")} Minutes ${String(total_duration % 60).padStart(1, "0")} Seconds`
+    tags.innerHTML += `Total: <span class="total-number">${String(Math.floor(total_duration / 3600)).padStart(1, "0")}</span> Hours <span class="total-number">${String(Math.floor(total_duration / 60)).padStart(1, "0")}</span> Minutes <span class="total-number">${String(total_duration % 60).padStart(1, "0")}</span> Seconds`
 }
 
