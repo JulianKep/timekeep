@@ -103,6 +103,25 @@ button[type="submit"]:hover,
     margin-left: auto;
 }
 
+#download-all {        /* AI-GENERATED */
+    min-height: 32px;  /* */
+    padding: 5px 10px; /* */
+    font-size: 13px;   /* */
+    display: block;    /* */
+    margin-left: auto; /* */
+}                      /* AI-GENERATED */
+
+#buttons {                          /* AI-GENERATED */
+    display: flex;                  /* */
+    align-items: center;            /* */
+    justify-content: space-between; /* */
+    gap: 8px;                       /* */
+}                                   /* */
+                                    /* */
+#buttons > button {                 /* */
+    margin-left: 0;                 /* */
+}                                   /* AI-GENERATED */
+
 #delete-btn:hover,
 #tags .del:hover {
     color: #efaaaa;
@@ -166,20 +185,22 @@ button[type="submit"]:hover,
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 8px;
+    line-height: 1.6;
+    margin-bottom: 2px;
 }
 
 .time-entry > span {
     min-width: 0;
 }
 
-#tags .del {
-    flex-shrink: 0;
-    min-height: 24px;
-    padding: 2px 7px;
-    border-radius: 5px;
-    font-size: 11px;
-}
+#tags .del {            /* AI-GENERATED */
+    flex-shrink: 0;     /* */
+    min-height: 20px;   /* */
+    padding: 1px 5px;   /* */
+    border-radius: 5px; /* */
+    font-size: 10px;    /* */
+    line-height: 1.2;   /* */
+}                       /* AI-GENERATED */
 
 ::selection {
     background: var(--accent);

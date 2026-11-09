@@ -17,24 +17,9 @@ function reload_ui(){
     display_times()
 }
 
+//
 
-
-document.getElementById("login-form").addEventListener("submit", async (event) => {
-    event.preventDefault();
-
-    email = document.getElementById('name').value
-    password = document.getElementById('password').value
-
-    const { data, error: loginFehler } = await db.auth.signInWithPassword({
-        email: email,
-        password: password,
-    });
-
-    if (loginFehler) return console.error(loginFehler.message);
-
-    user_id = data.user.id;
-
-
+function show_timer(){
 
     container.innerHTML = `
     <h1>TIMER</h1>
@@ -44,7 +29,10 @@ document.getElementById("login-form").addEventListener("submit", async (event) =
          </p>
     <p id="tags"></p>
     <br/>
-    <button id="delete-btn">delete data</button>
+    <div id="buttons">
+        <button id="download-all">download data</button>
+        <button id="delete-btn">delete data</button>
+    </div>
     `
 
     reload_ui();
@@ -76,6 +64,74 @@ document.getElementById("login-form").addEventListener("submit", async (event) =
 
     })
 
+    document.getElementById("download-all").addEventListener("click", async (event) => {                                       // AI-GENERATED
+        const button = event.currentTarget;                                                                                    //
+        const exportUserId = user_id;                                                                                          //
+        if (!exportUserId) return;                                                                                             //
+        button.disabled = true;                                                                                                //
+        try {                                                                                                                  //
+            const entries = [];                                                                                                //
+            let offset = 0;                                                                                                    //
+            while (true) {                                                                                                     //
+                const { data, error } = await db                                                                               //
+                    .from("time")                                                                                              //
+                    .select("id,start,end")                                                                                    //
+                    .eq("user_id", exportUserId)                                                                               //
+                    .order("start", { ascending: true })                                                                       //
+                    .order("id", { ascending: true })                                                                          //
+                    .range(offset, offset + 999);                                                                              //
+                if (error) throw error;                                                                                        //
+                if (!data.length) break;                                                                                       //
+                entries.push(...data);                                                                                         //
+                offset += data.length;                                                                                         //
+            }                                                                                                                  //
+            if (!entries.length) {                                                                                             //
+                alert("Keine gespeicherten Zeiten vorhanden.");                                                                //
+                return;                                                                                                        //
+            }                                                                                                                  //
+            const lines = [];                                                                                                  //
+            let previousDate = "";                                                                                             //
+            let previousMonth = "";                                                                                            //
+            for (const entry of entries) {                                                                                     //
+                const start = new Date(entry.start);                                                                           //
+                const end = new Date(entry.end);                                                                               //
+                const date = start.toLocaleDateString("de-DE");                                                                //
+                const month = start.toLocaleDateString("de-DE", { month: "long", year: "numeric" });                           //
+                if (month !== previousMonth) {                                                                                 //
+                    if (lines.length) lines.push("");                                                                          //
+                    lines.push(month, "#".repeat(month.length));                                                               //
+                    previousMonth = month;                                                                                     //
+                }                                                                                                              //
+                if (date !== previousDate) {                                                                                   //
+                    if (lines.length) lines.push("");                                                                          //
+                    lines.push(date, "=".repeat(date.length));                                                                 //
+                    previousDate = date;                                                                                       //
+                }                                                                                                              //
+                const seconds = Math.floor((end - start) / 1000);                                                              //
+                const duration = [                                                                                             //
+                    Math.floor(seconds / 3600),                                                                                //
+                    Math.floor(seconds / 60) % 60,                                                                             //
+                    seconds % 60                                                                                               //
+                ].map(value => String(value).padStart(2, "0")).join(":");                                                      //
+                lines.push("[" + duration + "] " + start.toLocaleTimeString("de-DE") + " bis " + end.toLocaleString("de-DE")); //
+            }                                                                                                                  //
+            const blob = new Blob(["\uFEFF", lines.join("\r\n") + "\r\n"], { type: "text/plain;charset=utf-8" });              //
+            const url = URL.createObjectURL(blob);                                                                             //
+            const link = document.createElement("a");                                                                          //
+            link.href = url;                                                                                                   //
+            link.download = "zeitstempel.txt";                                                                                 //
+            document.body.appendChild(link);                                                                                   //
+            link.click();                                                                                                      //
+            link.remove();                                                                                                     //
+            setTimeout(() => URL.revokeObjectURL(url), 1000);                                                                  //
+        } catch (error) {                                                                                                      //
+            console.error("Download fehlgeschlagen:", error);                                                                  //
+            alert("Die Zeitstempel konnten nicht heruntergeladen werden.");                                                    //
+        } finally {                                                                                                            //
+            button.disabled = false;                                                                                           //
+        }                                                                                                                      //
+    });                                                                                                                        // AI-GENERATED
+
     document.getElementById("delete-btn").addEventListener("click", async () => {
         await delete_all_data();
         reload_ui();
@@ -86,8 +142,47 @@ document.getElementById("login-form").addEventListener("submit", async (event) =
             delete_entry(e.target.parentElement.id);
         }
     });
+}
+
+
+
+
+document.getElementById("login-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    email = document.getElementById('name').value
+    password = document.getElementById('password').value
+
+    const { data, error} = await db.auth.signInWithPassword({
+        email: email,
+        password: password,
+    });
+
+    if (error) {
+        console.error(error.message);
+        return;
+    }
+
+    user_id = data.user.id;
+    show_timer();
 
 })
+
+async function restore_login() {
+    const { data: { session }, error } = await db.auth.getSession();
+
+    if (error) {
+        console.error(error.message);
+        return;
+    }
+
+    if (session) {
+        user_id = session.user.id;
+        show_timer();
+    }
+}
+
+restore_login();
 
 
 async function delete_all_data(){
